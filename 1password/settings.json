@@ -1,0 +1,7 @@
+{
+  "developers.cliSharedLockState.enabled": true,
+  "security.authenticatedUnlock.appleTouchId": true,
+  "security.authenticatedUnlock.enabled": true,
+  "privacy.checkHibp": true,
+  "itemDetails.showWebFormDetails": true
+}
