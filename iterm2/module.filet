@@ -2,6 +2,7 @@ use homebrew
 use plist
 
 brew_install iterm2
+url_sync ~/.zshrc.d/last/iterm2.sh https://iterm2.com/shell_integration/zsh
 
 ITERM2_PREFERENCES="$HOME"/Library/Preferences/com.googlecode.iterm2.plist
 
@@ -20,7 +21,8 @@ fi
 
 plist_set "${ITERM2_PREFERENCES}" \
   bool SUEnableAutomaticChecks true \
-  bool OpenNoWindowsAtStartup  true
+  bool OpenNoWindowsAtStartup  true \
+  bool "New Bookmarks.0.Unlimited Scrollback" true
 
 iterm2_pulldown_window() (
   # Hard coded to the second profile; skip if it exists
@@ -28,31 +30,28 @@ iterm2_pulldown_window() (
     return 0
   fi
 
-  plist_copy "${ITERM2_PREFERENCES}" "new Bookmarks.0" "New Bookmarks.1"
+  plist_copy "${ITERM2_PREFERENCES}" "New Bookmarks.0" "New Bookmarks.1"
 
-  plist_set "${ITERM2_PREFERENCES}" \
-    string  "New Bookmarks.1.Guid"         "$(uuidgen)" \
-    string  "New Bookmarks.1.Name"         "Pulldown" \
-    bool    "New Bookmarks.1.Has Hotkey"   true \
-    bool    "New Bookmarks.1.Blur"         true \
-    real    "New Bookmarks.1.Blur Radius"  24 \
-    real    "New Bookmarks.1.Transparency" 0.15 \
-    integer "New Bookmarks.1.Space"        -1 \
-    integer "New Bookmarks.1.Window Type"  2 \
+
+  iterm2_profile_settings 1 \
+    string  "Guid"         "$(uuidgen)" \
+    string  "Name"         "Pulldown" \
+    bool    "Has Hotkey"   true \
+    integer "Space"        -1 \
+    integer "Window Type"  2 \
     \
-    bool    "New Bookmarks.1.HotKey Activated By Modifier"         false \
-    array   "New Bookmarks.1.HotKey Alternate Shortcuts"           "()" \
-    string  "New Bookmarks.1.HotKey Characters"                    "" \
-    string  "New Bookmarks.1.HotKey Characters Ignoring Modifiers" " "  \
-    integer "New Bookmarks.1.HotKey Key Code"                      49 \
-    integer "New Bookmarks.1.HotKey Modifier Activation"           0 \
-    integer "New Bookmarks.1.HotKey Modifier Flags"                262144 \
-    bool    "New Bookmarks.1.HotKey Window Animates"               true \
-    bool    "New Bookmarks.1.HotKey Window AutoHides"              true \
-    integer "New Bookmarks.1.HotKey Window Dock Click Action"      0 \
-    bool    "New Bookmarks.1.HotKey Window Floats"                 true \
-    bool    "New Bookmarks.1.HotKey Window Reopens On Activation"  false
-
+    bool    "HotKey Activated By Modifier"         false \
+    array   "HotKey Alternate Shortcuts"           "()" \
+    string  "HotKey Characters"                    "" \
+    string  "HotKey Characters Ignoring Modifiers" " "  \
+    integer "HotKey Key Code"                      49 \
+    integer "HotKey Modifier Activation"           0 \
+    integer "HotKey Modifier Flags"                262144 \
+    bool    "HotKey Window Animates"               true \
+    bool    "HotKey Window AutoHides"              true \
+    integer "HotKey Window Dock Click Action"      0 \
+    bool    "HotKey Window Floats"                 true \
+    bool    "HotKey Window Reopens On Activation"  false
 )
 
 iterm2_theme() (
@@ -61,7 +60,7 @@ iterm2_theme() (
   cd -
 
   local index=0
-  while /usr/libexec/PlistBuddy -c "Print :'New Bookmarks':$index" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; do
+  while plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.$index"; do
     local staging=$(mktemp -d)
     cd "${staging}"
 
@@ -75,6 +74,19 @@ iterm2_theme() (
     cd -
     rm -rf "${staging}"
 
+    index=$((index + 1))
+  done
+)
+
+iterm2_profile_settings() (
+  profile="$1"
+  settings=("${@:2}")
+
+  local index=0
+  while plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.$index"; do
+    if [[ "$profile" == "all" || "$profile" == "$index" ]]; then
+      plist_set "${ITERM2_PREFERENCES}" "New Bookmarks.$index" "${settings[@]}"
+    fi
     index=$((index + 1))
   done
 )
