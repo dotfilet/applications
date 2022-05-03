@@ -5,6 +5,8 @@ use json
 brew_install 1password-beta
 brew_install 1password-cli
 
+copy ~/.zshrc.d
+
 settings_root=~/"Library/Group Containers/2BUA8C4S2C.com.1password/Library/Application Support/1Password/Data/settings"
 # If this is a fresh install, launch 1Password and wait for it to initialize.
 if [[ ! -d "${settings_root}" ]]; then
@@ -13,7 +15,7 @@ if [[ ! -d "${settings_root}" ]]; then
       sleep 0.1
     done
     sleep 0.5 # What else can we detect…?
-    killall 1Password
+    killall -m 1Password
   ) &
   open -W /Applications/1Password.app
 fi

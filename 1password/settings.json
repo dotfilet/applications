@@ -3,5 +3,7 @@
   "security.authenticatedUnlock.appleTouchId": true,
   "security.authenticatedUnlock.enabled": true,
   "privacy.checkHibp": true,
-  "itemDetails.showWebFormDetails": true
+  "itemDetails.showWebFormDetails": true,
+  "sshAgent.enabled": true,
+  "sshAgent.storeKeyTitles": true
 }
