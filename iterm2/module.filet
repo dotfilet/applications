@@ -20,9 +20,7 @@ if ! plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.0"; then
 fi
 
 plist_set "${ITERM2_PREFERENCES}" \
-  bool SUEnableAutomaticChecks true \
-  bool OpenNoWindowsAtStartup  true \
-  bool "New Bookmarks.0.Unlimited Scrollback" true
+  bool SUEnableAutomaticChecks true
 
 iterm2_pulldown_window() (
   # Hard coded to the second profile; skip if it exists
@@ -31,7 +29,6 @@ iterm2_pulldown_window() (
   fi
 
   plist_copy "${ITERM2_PREFERENCES}" "New Bookmarks.0" "New Bookmarks.1"
-
 
   iterm2_profile_settings 1 \
     string  "Guid"         "$(uuidgen)" \
