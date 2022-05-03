@@ -1,0 +1,75 @@
+use homebrew
+
+brew_install iterm2
+
+ITERM2_PREFERENCES="$HOME"/Library/Preferences/com.googlecode.iterm2.plist
+
+# If this is a fresh install, launch iTerm and wait for preferences to be created.
+if ! /usr/libexec/PlistBuddy -x -c "Print :'New Bookmarks':0" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; then
+  (
+    # Note that iTerm is kinda slow.
+    while ! /usr/libexec/PlistBuddy -x -c "Print :'New Bookmarks':0" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; do
+      sleep 0.1
+    done
+
+    # One-time Setup
+    /usr/libexec/PlistBuddy -c "Add :SUEnableAutomaticChecks bool true" "${ITERM2_PREFERENCES}"
+    /usr/libexec/PlistBuddy -c "Add :OpenNoWindowsAtStartup bool true" "${ITERM2_PREFERENCES}" > /dev/null
+
+    killall -SIGINT iTerm2
+  ) &
+  open -W /Applications/iTerm.app
+fi
+
+iterm2_pulldown_window() (
+  # Hard coded to the second profile; skip if it exists
+  if /usr/libexec/PlistBuddy -c "Print :'New Bookmarks':1" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; then
+    return 0
+  fi
+
+  /usr/libexec/PlistBuddy -c "Copy :'New Bookmarks':0 :'New Bookmarks':1" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Guid' '$(uuidgen)'" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Name' 'Pulldown'" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'Has Hotkey' bool true" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Activated By Modifier' bool false" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Alternate Shortcuts' array" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Characters' string ''" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Characters Ignoring Modifiers' string ' '" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Key Code' integer 49" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Modifier Activation' integer 0" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Modifier Flags' integer 262144" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Animates' bool true" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window AutoHides' bool true" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Dock Click Action' integer 0" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Floats' bool true" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Reopens On Activation' bool false" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Blur' true" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'Blur Radius' real 24" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Transparency' 0.15" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'Space' integer -1" "${ITERM2_PREFERENCES}"
+  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Window Type' 2" "${ITERM2_PREFERENCES}"
+)
+
+iterm2_theme() (
+  cd "${FILET_CURRENT_MODULE_ROOT}"
+  local theme="${1:A}"
+  cd -
+
+  local index=0
+  while /usr/libexec/PlistBuddy -c "Print :'New Bookmarks':$index" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; do
+    local staging=$(mktemp -d)
+    cd "${staging}"
+
+    /usr/libexec/PlistBuddy -x -c "Print :'New Bookmarks':$index" "${ITERM2_PREFERENCES}" > ./existing.plist
+    cp "${theme}" ./merged.plist
+    /usr/libexec/PlistBuddy -x -c "Merge ./existing.plist" ./merged.plist > /dev/null
+    /usr/libexec/PlistBuddy -c "Delete :'New Bookmarks':$index" "${ITERM2_PREFERENCES}"
+    /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':$index dict" "${ITERM2_PREFERENCES}"
+    /usr/libexec/PlistBuddy -c "Merge ./merged.plist :'New Bookmarks':$index" "${ITERM2_PREFERENCES}"
+
+    cd -
+    rm -rf "${staging}"
+
+    index=$((index + 1))
+  done
+)
