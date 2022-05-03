@@ -14,7 +14,7 @@ if ! plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.0"; then
       sleep 0.1
     done
 
-    killall -SIGINT iTerm2
+    killall -m iTerm
   ) &
   open -W /Applications/iTerm.app
 fi
