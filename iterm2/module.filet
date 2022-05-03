@@ -1,53 +1,58 @@
 use homebrew
+use plist
 
 brew_install iterm2
 
 ITERM2_PREFERENCES="$HOME"/Library/Preferences/com.googlecode.iterm2.plist
 
 # If this is a fresh install, launch iTerm and wait for preferences to be created.
-if ! /usr/libexec/PlistBuddy -x -c "Print :'New Bookmarks':0" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; then
+if ! plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.0"; then
   (
     # Note that iTerm is kinda slow.
-    while ! /usr/libexec/PlistBuddy -x -c "Print :'New Bookmarks':0" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; do
+    while ! plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.0"; do
       sleep 0.1
     done
-
-    # One-time Setup
-    /usr/libexec/PlistBuddy -c "Add :SUEnableAutomaticChecks bool true" "${ITERM2_PREFERENCES}"
-    /usr/libexec/PlistBuddy -c "Add :OpenNoWindowsAtStartup bool true" "${ITERM2_PREFERENCES}" > /dev/null
 
     killall -SIGINT iTerm2
   ) &
   open -W /Applications/iTerm.app
 fi
 
+plist_set "${ITERM2_PREFERENCES}" \
+  bool SUEnableAutomaticChecks true \
+  bool OpenNoWindowsAtStartup  true
+
 iterm2_pulldown_window() (
   # Hard coded to the second profile; skip if it exists
-  if /usr/libexec/PlistBuddy -c "Print :'New Bookmarks':1" "${ITERM2_PREFERENCES}" > /dev/null 2>&1; then
+  if plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.1"; then
     return 0
   fi
 
-  /usr/libexec/PlistBuddy -c "Copy :'New Bookmarks':0 :'New Bookmarks':1" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Guid' '$(uuidgen)'" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Name' 'Pulldown'" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'Has Hotkey' bool true" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Activated By Modifier' bool false" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Alternate Shortcuts' array" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Characters' string ''" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Characters Ignoring Modifiers' string ' '" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Key Code' integer 49" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Modifier Activation' integer 0" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Modifier Flags' integer 262144" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Animates' bool true" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window AutoHides' bool true" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Dock Click Action' integer 0" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Floats' bool true" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'HotKey Window Reopens On Activation' bool false" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Blur' true" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'Blur Radius' real 24" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Transparency' 0.15" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Add :'New Bookmarks':1:'Space' integer -1" "${ITERM2_PREFERENCES}"
-  /usr/libexec/PlistBuddy -c "Set :'New Bookmarks':1:'Window Type' 2" "${ITERM2_PREFERENCES}"
+  plist_copy "${ITERM2_PREFERENCES}" "new Bookmarks.0" "New Bookmarks.1"
+
+  plist_set "${ITERM2_PREFERENCES}" \
+    string  "New Bookmarks.1.Guid"         "$(uuidgen)" \
+    string  "New Bookmarks.1.Name"         "Pulldown" \
+    bool    "New Bookmarks.1.Has Hotkey"   true \
+    bool    "New Bookmarks.1.Blur"         true \
+    real    "New Bookmarks.1.Blur Radius"  24 \
+    real    "New Bookmarks.1.Transparency" 0.15 \
+    integer "New Bookmarks.1.Space"        -1 \
+    integer "New Bookmarks.1.Window Type"  2 \
+    \
+    bool    "New Bookmarks.1.HotKey Activated By Modifier"         false \
+    array   "New Bookmarks.1.HotKey Alternate Shortcuts"           "()" \
+    string  "New Bookmarks.1.HotKey Characters"                    "" \
+    string  "New Bookmarks.1.HotKey Characters Ignoring Modifiers" " "  \
+    integer "New Bookmarks.1.HotKey Key Code"                      49 \
+    integer "New Bookmarks.1.HotKey Modifier Activation"           0 \
+    integer "New Bookmarks.1.HotKey Modifier Flags"                262144 \
+    bool    "New Bookmarks.1.HotKey Window Animates"               true \
+    bool    "New Bookmarks.1.HotKey Window AutoHides"              true \
+    integer "New Bookmarks.1.HotKey Window Dock Click Action"      0 \
+    bool    "New Bookmarks.1.HotKey Window Floats"                 true \
+    bool    "New Bookmarks.1.HotKey Window Reopens On Activation"  false
+
 )
 
 iterm2_theme() (

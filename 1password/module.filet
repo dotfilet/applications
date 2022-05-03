@@ -1,6 +1,6 @@
 use homebrew
 use jq
-use merge-json
+use json
 
 brew_install 1password-beta
 brew_install 1password-cli
