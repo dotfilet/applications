@@ -45,7 +45,7 @@ iterm2_pulldown_window() (
     integer "HotKey Modifier Activation"           0 \
     integer "HotKey Modifier Flags"                262144 \
     bool    "HotKey Window Animates"               true \
-    bool    "HotKey Window AutoHides"              true \
+    bool    "HotKey Window AutoHides"              false \
     integer "HotKey Window Dock Click Action"      0 \
     bool    "HotKey Window Floats"                 true \
     bool    "HotKey Window Reopens On Activation"  false
