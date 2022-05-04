@@ -2,7 +2,7 @@ use homebrew
 use jq
 use json
 
-brew_install 1password-beta
+brew_install 1password
 brew_install 1password-cli
 
 copy ~/.zshrc.d
