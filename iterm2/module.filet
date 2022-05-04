@@ -24,11 +24,9 @@ plist_set "${ITERM2_PREFERENCES}" \
 
 iterm2_pulldown_window() (
   # Hard coded to the second profile; skip if it exists
-  if plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.1"; then
-    return 0
+  if ! plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.1"; then
+    plist_copy "${ITERM2_PREFERENCES}" "New Bookmarks.0" "New Bookmarks.1"
   fi
-
-  plist_copy "${ITERM2_PREFERENCES}" "New Bookmarks.0" "New Bookmarks.1"
 
   iterm2_profile_settings 1 \
     string  "Guid"         "$(uuidgen)" \
