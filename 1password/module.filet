@@ -7,11 +7,12 @@ brew_install 1password-cli
 
 copy ~/.zshrc.d
 
-settings_root=~/"Library/Group Containers/2BUA8C4S2C.com.1password/Library/Application Support/1Password/Data/settings"
+ONEPASSWORD_SETTINGS_ROOT=~/"Library/Group Containers/2BUA8C4S2C.com.1password/Library/Application Support/1Password/Data/settings"
+ONEPASSWORD_SETTINGS="${ONEPASSWORD_SETTINGS_ROOT}"/settings.json
 # If this is a fresh install, launch 1Password and wait for it to initialize.
-if [[ ! -d "${settings_root}" ]]; then
+if [[ ! -d "${ONEPASSWORD_SETTINGS_ROOT}" ]]; then
   (
-    while [[ ! -d "${settings_root}" ]]; do
+    while [[ ! -d "${ONEPASSWORD_SETTINGS_ROOT}" ]]; do
       sleep 0.1
     done
     sleep 0.5 # What else can we detect…?
@@ -20,7 +21,7 @@ if [[ ! -d "${settings_root}" ]]; then
   open -W /Applications/1Password.app
 fi
 
-merge_json "${settings_root}/settings.json" ./settings.json
+merge_json "${ONEPASSWORD_SETTINGS}" ./settings.json
 
 1pass_has_account() (
   email="${1}"
