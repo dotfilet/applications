@@ -16,7 +16,7 @@ if [[ ! -d "${ONEPASSWORD_SETTINGS_ROOT}" ]]; then
       sleep 0.1
     done
     sleep 0.5 # What else can we detect…?
-    killall -m 1Password
+    killall 1Password
   ) &
   open -W /Applications/1Password.app
 fi
@@ -37,6 +37,11 @@ merge_json "${ONEPASSWORD_SETTINGS}" ./settings.json
   if 1pass_has_account "${email}" "${server}"; then return 0; fi
 
   echo "Please log into ${server} as ${email}…"
+
+  # Make sure that 1Password is running so that the op bridge works
+  open /Applications/1Password.app
+  sleep 1.0
+
   open "onepassword://team-account/add?email=${email}&server=https://${server}"
   while ! 1pass_has_account "${email}" "${server}"; do
     sleep 0.1
