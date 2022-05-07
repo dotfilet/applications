@@ -1,3 +1,14 @@
 use homebrew
 
 brew_install alfred
+
+ALFRED_SETTINGS_ROOT=~/"Library/Application Support/Alfred"
+if [[ ! -d "${ALFRED_SETTINGS_ROOT}" ]]; then
+  (
+    while [[ ! -d "${ALFRED_SETTINGS_ROOT}" ]]; do
+      sleep 0.1
+    done
+    killall "Alfred Preferences"
+  ) &
+  open -W "/Applications/Alfred 4.app/Contents/Preferences/Alfred Preferences.app"
+fi
