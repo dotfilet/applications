@@ -1,3 +1,8 @@
 use homebrew
 
 brew_install google-chrome
+
+chrome_as_default_browser() {
+  brew_install defaultbrowser
+  defaultbrowser chrome
+}
