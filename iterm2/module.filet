@@ -23,6 +23,8 @@ plist_set "${ITERM2_PREFERENCES}" \
   bool SUEnableAutomaticChecks true
 
 iterm2_pulldown_window() (
+  extra_settings=("$@")
+
   # Hard coded to the second profile; skip if it exists
   if ! plist_has_key "${ITERM2_PREFERENCES}" "New Bookmarks.1"; then
     plist_copy "${ITERM2_PREFERENCES}" "New Bookmarks.0" "New Bookmarks.1"
@@ -47,6 +49,11 @@ iterm2_pulldown_window() (
     integer "HotKey Window Dock Click Action"      0 \
     bool    "HotKey Window Floats"                 true \
     bool    "HotKey Window Reopens On Activation"  false
+
+  if [[ ${#extra_settings[@]} -gt 0 ]]; then
+    iterm2_profile_settings 1 \
+      "${extra_settings[@]}"
+  fi
 )
 
 iterm2_theme() (
